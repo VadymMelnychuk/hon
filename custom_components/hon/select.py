@@ -6,10 +6,9 @@ from dataclasses import dataclass
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature, UnitOfTime, REVOLUTIONS_PER_MINUTE
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant as HomeAssistantType, callback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import HomeAssistantType
 
 from . import const
 from .const import DOMAIN
@@ -188,21 +187,13 @@ SELECTS: dict[str, tuple[SelectEntityDescription, ...]] = {
     ),
     "WH": (
         HonSelectEntityDescription(
-            key="settings.tempSel",
-            name="Target Temperature",
-            icon="mdi:thermometer",
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
-            translation_key="target_temperature",
-            send_key_only=True,
-        ),
-        HonSelectEntityDescription(
             key="settings.machMode",
             name="Mode",
             send_key_only=True,
             icon="mdi:information",
             option_list=const.WH_MACH_MODE,
             translation_key="mach_modes_wh",
-          ),
+        ),
     ),
     "FRE": (
         HonConfigSelectEntityDescription(
@@ -303,9 +294,16 @@ class HonSelectEntity(HonEntity, SelectEntity):
 
     @property
     def current_option(self) -> str | None:
-        if not (setting := self._device.settings.get(self.entity_description.key)):
-            return None
-        value = get_readable(self.entity_description, setting.value)
+        key = self.entity_description.key
+        if self.entity_description.send_key_only:
+            key = key.split('.')[1]
+            value = self._device.get(key, "")
+            value = get_readable(self.entity_description, value)
+        else:
+            if not (setting := self._device.settings.get(self.entity_description.key)):
+                return None
+            value = get_readable(self.entity_description, setting.value)
+
         if value not in self._attr_options:
             return None
         return str(value)
@@ -357,4 +355,4 @@ class HonSelectEntity(HonEntity, SelectEntity):
         self._attr_options = self.options
         self._attr_current_option = self.current_option
         if update:
-            self.async_write_ha_state()
+            self.schedule_update_ha_state()

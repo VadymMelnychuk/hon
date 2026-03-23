@@ -5,8 +5,8 @@ from typing import Any
 import voluptuous as vol  # type: ignore[import-untyped]
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
+from homeassistant.core import HomeAssistant as HomeAssistantType
 from homeassistant.helpers import config_validation as cv, aiohttp_client
-from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from pyhon import Hon
 
@@ -53,10 +53,11 @@ async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry) -> bool
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.unique_id] = {"hon": hon, "coordinator": coordinator}
 
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, platform)
-        )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    #for platform in PLATFORMS:
+    #    hass.async_create_task(
+    #        hass.config_entries.async_forward_entry_setups(entry, platform)
+    #    )
     return True
 
 

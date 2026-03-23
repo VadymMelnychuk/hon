@@ -7,9 +7,8 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant as HomeAssistantType, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import HomeAssistantType
 
 from .const import DOMAIN
 from .entity import HonEntity
@@ -356,4 +355,4 @@ class HonBinarySensorEntity(HonEntity, BinarySensorEntity):
             == self.entity_description.on_value
         )
         if update:
-            self.async_write_ha_state()
+            self.schedule_update_ha_state()

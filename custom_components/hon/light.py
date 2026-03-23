@@ -8,9 +8,8 @@ from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant as HomeAssistantType, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import HomeAssistantType
 from pyhon.appliance import HonAppliance
 from pyhon.parameter.range import HonParameterRange
 
